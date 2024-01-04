@@ -57,7 +57,18 @@ func getRoot(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/", getRoot)
 
-	err := http.ListenAndServe(":3333", nil)
+	go func() {
+		err := http.ListenAndServe(":3332", nil)
+
+		if errors.Is(err, http.ErrServerClosed) {
+			fmt.Printf("server closed\n")
+		} else if err != nil {
+			fmt.Printf("error starting server: %s\n", err)
+			os.Exit(1)
+		}
+	}()
+
+	err := http.ListenAndServeTLS(":3333", "server.crt", "server.key", nil)
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")
